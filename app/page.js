@@ -1,65 +1,83 @@
-import Image from "next/image";
 
-export default function Home() {
+// ============================================================
+// app/page.js — ГЛАВНАЯ
+// ============================================================
+import { getPosts } from '@/lib/posts'
+import PostCard from '@/components/PostCard'
+
+export const metadata = {
+  title: 'WhataFaaanfic — ИИ-генератор фанфиков',
+  description: 'Создай фанфик по любимому аниме, сериалу или фильму за 30 секунд. Нейросеть пишет за тебя.',
+}
+
+const BOT_URL = 'https://t.me/whatafaaanfic_bot'
+
+export default async function HomePage() {
+  const posts = await getPosts(3)
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      {/* HERO */}
+      <section className="max-w-5xl mx-auto px-4 pt-16 pb-12 text-center">
+        <div className="inline-block bg-pink-100 text-pink-600 text-sm font-medium px-3 py-1 rounded-full mb-4">
+          🤖 На основе нейросети Gemini AI
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-pink-800 leading-tight mb-4">
+          Фанфики по любимым <br className="hidden md:block" />
+          аниме и сериалам — за 30 секунд
+        </h1>
+        <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-8">
+          Введи название вселенной, персонажей и задумку — нейросеть напишет уникальный фанфик прямо в Telegram.
+          Гарри Поттер, Атака Титанов, Очень странные дела — любая вселенная.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href={`${BOT_URL}?utm_source=blog&utm_medium=hero_cta&utm_campaign=fanfic_bot`}
             target="_blank"
-            rel="noopener noreferrer"
+            className="bg-pink-600 text-white font-semibold px-8 py-3 rounded-full text-lg hover:bg-pink-800 transition-colors shadow-md"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+            ✨ Создать фанфик бесплатно
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/demo"
+            className="bg-white text-pink-600 border border-pink-300 font-semibold px-8 py-3 rounded-full text-lg hover:bg-pink-50 transition-colors"
           >
-            Documentation
+            Посмотреть демо →
           </a>
         </div>
-      </main>
-    </div>
-  );
+      </section>
+
+      {/* КАК ЭТО РАБОТАЕТ */}
+      <section className="max-w-4xl mx-auto px-4 py-12">
+        <h2 className="text-2xl font-bold text-center text-pink-800 mb-8">Как это работает</h2>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            { step: '1', icon: '🎬', title: 'Выбери вселенную', desc: 'Напиши название аниме, сериала или фильма' },
+            { step: '2', icon: '🧑‍🤝‍🧑', title: 'Укажи персонажей', desc: 'Выбери героев и добавь задумку по желанию' },
+            { step: '3', icon: '📖', title: 'Получи фанфик', desc: 'Нейросеть пишет уникальную историю за 30 секунд' },
+          ].map(({ step, icon, title, desc }) => (
+            <div key={step} className="bg-white rounded-2xl p-6 shadow-sm border border-pink-100 text-center">
+              <div className="text-3xl mb-3">{icon}</div>
+              <div className="text-xs font-bold text-pink-400 uppercase mb-1">Шаг {step}</div>
+              <h3 className="font-bold text-gray-800 mb-2">{title}</h3>
+              <p className="text-sm text-gray-500">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ПРИМЕРЫ ИЗ БЛОГА */}
+      {posts.length > 0 && (
+        <section className="max-w-5xl mx-auto px-4 py-8">
+          <h2 className="text-2xl font-bold text-pink-800 mb-6">Из блога</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {posts.map(p => <PostCard key={p.slug} post={p} />)}
+          </div>
+          <div className="text-center mt-8">
+            <a href="/blog" className="text-pink-600 font-medium hover:underline">Все статьи →</a>
+          </div>
+        </section>
+      )}
+    </>
+  )
 }
