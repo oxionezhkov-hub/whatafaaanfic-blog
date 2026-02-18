@@ -1,9 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-// ============================================================
-// app/globals.css
-// ============================================================
-// @tailwind base;
-// @tailwind components;
-// @tailwind utilities;
-//
-// body { @apply antialiased; }
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
