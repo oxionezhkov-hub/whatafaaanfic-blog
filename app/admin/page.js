@@ -1,65 +1,76 @@
-import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+// ============================================================
+// app/admin/page.js — ЗАГРУЗКА СТАТЬИ
+// ============================================================
+'use client'
+import { useState } from 'react'
+
+const CATEGORIES = ['anime', 'serials', 'films', 'ai']
+
+export default function AdminPage() {
+  const [form, setForm] = useState({ title: '', slug: '', description: '', category: 'anime', date: new Date().toISOString().slice(0, 10), coverUrl: '', universeTag: '', content: '' })
+  const [status, setStatus] = useState(null)
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const autoSlug = (title) => title.toLowerCase().replace(/[^a-zа-яё0-9\s]/gi, '').replace(/\s+/g, '-').replace(/[а-яё]/gi, c => ({ а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'yo',ж:'zh',з:'z',и:'i',й:'j',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya' }[c] || c))
+
+  const submit = async () => {
+    setStatus('loading')
+    const res = await fetch('/api/admin/post', {
+      method: 'POST',
+      body: JSON.stringify(form),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    setStatus(res.ok ? 'ok' : 'err')
+  }
+
+  const field = (label, key, type = 'text', opts = {}) => (
+    <div key={key}>
+      <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
+      {type === 'textarea'
+        ? <textarea rows={opts.rows || 4} className="w-full border border-pink-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 resize-y" value={form[key]} onChange={e => set(key, e.target.value)} />
+        : <input type={type} className="w-full border border-pink-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" value={form[key]} onChange={e => set(key, e.target.value)} />
+      }
     </div>
-  );
+  )
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-12">
+      <h1 className="text-2xl font-bold text-pink-800 mb-8">Добавить статью</h1>
+      <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-8 flex flex-col gap-5">
+        {field('Заголовок (H1)', 'title')}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Slug (URL)</label>
+          <div className="flex gap-2">
+            <input className="flex-1 border border-pink-200 rounded-xl px-3 py-2 text-sm focus:outline-none" value={form.slug} onChange={e => set('slug', e.target.value)} />
+            <button onClick={() => set('slug', autoSlug(form.title))} className="bg-pink-100 text-pink-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-pink-200">
+              Авто
+            </button>
+          </div>
+        </div>
+        {field('Meta description (140-160 символов)', 'description', 'textarea', { rows: 3 })}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Категория</label>
+          <select className="w-full border border-pink-200 rounded-xl px-3 py-2 text-sm focus:outline-none" value={form.category} onChange={e => set('category', e.target.value)}>
+            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        {field('Дата публикации', 'date', 'date')}
+        {field('URL обложки', 'coverUrl')}
+        {field('Тег вселенной (для попапа)', 'universeTag')}
+        {field('Контент статьи (HTML)', 'content', 'textarea', { rows: 12 })}
+
+        <button
+          onClick={submit}
+          disabled={!form.title || !form.slug || !form.content}
+          className="bg-pink-600 text-white font-bold py-3 rounded-xl hover:bg-pink-800 transition-colors disabled:opacity-40"
+        >
+          {status === 'loading' ? 'Сохраняю...' : '💾 Опубликовать статью'}
+        </button>
+        {status === 'ok' && <p className="text-green-500 text-center text-sm">✅ Статья опубликована!</p>}
+        {status === 'err' && <p className="text-red-400 text-center text-sm">Ошибка. Попробуй ещё раз.</p>}
+      </div>
+    </div>
+  )
 }
