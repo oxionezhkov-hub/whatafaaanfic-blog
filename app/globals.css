@@ -2,7 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
 body {
+  font-family: 'Nunito', sans-serif;
+  background-color: #FFF5F7;
+  color: #2d2d2d;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
+
+.prose p { margin-bottom: 1.2em; line-height: 1.8; }
+.prose h2 { font-size: 1.4rem; font-weight: 800; color: #8B1A3A; margin: 2em 0 0.8em; }
+.prose h3 { font-size: 1.15rem; font-weight: 700; color: #C2185B; margin: 1.5em 0 0.6em; }
+.prose ul { list-style: disc; padding-left: 1.5em; margin-bottom: 1.2em; }
+.prose li { margin-bottom: 0.4em; line-height: 1.7; }
+.prose a { color: #C2185B; text-decoration: underline; }
