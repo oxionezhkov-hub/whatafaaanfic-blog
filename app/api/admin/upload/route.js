@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import fs from 'fs'
 import path from 'path'
 
 export async function POST(req) {
-  // Проверка пароля
-  const cookieStore = await cookies()
-  const token = cookieStore.get('admin_token')
-  if (token?.value !== process.env.ADMIN_PASSWORD) {
+  // Проверка пароля через заголовок
+  const authHeader = req.headers.get('x-admin-password')
+  if (authHeader !== process.env.ADMIN_PASSWORD) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Читаем файл
   const formData = await req.formData()
   const file = formData.get('file')
   if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
