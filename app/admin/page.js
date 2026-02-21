@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 export default function AdminPage() {
   const [file, setFile] = useState(null)
+  const [password, setPassword] = useState('')
   const [status, setStatus] = useState(null)
   const [preview, setPreview] = useState('')
 
@@ -17,13 +18,23 @@ export default function AdminPage() {
   }
 
   const upload = async () => {
-    if (!file) return
+    if (!file || !password) return
     setStatus('loading')
     const formData = new FormData()
     formData.append('file', file)
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
-    setStatus(res.ok ? 'ok' : 'err')
-    if (res.ok) { setFile(null); setPreview('') }
+    const res = await fetch('/api/admin/upload', {
+      method: 'POST',
+      headers: { 'x-admin-password': password },
+      body: formData,
+    })
+    if (res.ok) {
+      setStatus('ok')
+      setFile(null)
+      setPreview('')
+    } else {
+      const data = await res.json()
+      setStatus(data.error === 'Unauthorized' ? 'wrong_password' : 'err')
+    }
   }
 
   return (
@@ -50,8 +61,25 @@ export default function AdminPage() {
         &lt;p&gt;Текст статьи в HTML...&lt;/p&gt;
       </div>
 
-      {/* Загрузка */}
-      <label style={{ display: 'block', border: '2px dashed #E8728A', borderRadius: '16px', padding: '2.5rem', textAlign: 'center', cursor: 'pointer', background: file ? '#FFF0F5' : '#fff', transition: 'background 0.2s' }}>
+      {/* Пароль */}
+      <div style={{ marginBottom: '1.2rem' }}>
+        <label style={{ display: 'block', fontWeight: 700, fontSize: '0.9rem', color: '#555', marginBottom: '0.4rem' }}>
+          🔐 Пароль админки
+        </label>
+        <input
+          type="password"
+          placeholder="Введи пароль из Vercel"
+          value={password}
+          onChange={e => { setPassword(e.target.value); setStatus(null) }}
+          style={{ width: '100%', border: `2px solid ${status === 'wrong_password' ? '#e57373' : '#F4A7B9'}`, borderRadius: '12px', padding: '11px 16px', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+        />
+        {status === 'wrong_password' && (
+          <p style={{ color: '#e57373', fontSize: '0.82rem', marginTop: '0.3rem' }}>Неверный пароль</p>
+        )}
+      </div>
+
+      {/* Загрузка файла */}
+      <label style={{ display: 'block', border: '2px dashed #E8728A', borderRadius: '16px', padding: '2.5rem', textAlign: 'center', cursor: 'pointer', background: file ? '#FFF0F5' : '#fff' }}>
         <input type="file" accept=".txt" onChange={onFile} style={{ display: 'none' }} />
         <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📄</div>
         <div style={{ fontWeight: 700, color: '#C2185B', marginBottom: '0.3rem' }}>
@@ -70,8 +98,8 @@ export default function AdminPage() {
 
       <button
         onClick={upload}
-        disabled={!file || status === 'loading'}
-        style={{ width: '100%', marginTop: '1.5rem', background: file ? 'linear-gradient(135deg, #E8728A, #C2185B)' : '#ddd', color: '#fff', fontWeight: 800, fontSize: '1rem', padding: '14px', borderRadius: '50px', border: 'none', cursor: file ? 'pointer' : 'default', transition: 'opacity 0.2s' }}
+        disabled={!file || !password || status === 'loading'}
+        style={{ width: '100%', marginTop: '1.5rem', background: (file && password) ? 'linear-gradient(135deg, #E8728A, #C2185B)' : '#ddd', color: '#fff', fontWeight: 800, fontSize: '1rem', padding: '14px', borderRadius: '50px', border: 'none', cursor: (file && password) ? 'pointer' : 'default', fontFamily: 'inherit' }}
       >
         {status === 'loading' ? 'Публикую...' : '💾 Опубликовать статью'}
       </button>
@@ -83,7 +111,7 @@ export default function AdminPage() {
       )}
       {status === 'err' && (
         <div style={{ marginTop: '1rem', background: '#fdecea', color: '#c62828', borderRadius: '12px', padding: '0.8rem 1rem', textAlign: 'center', fontWeight: 700 }}>
-          ❌ Ошибка. Проверь формат файла и попробуй снова.
+          ❌ Ошибка. Проверь формат файла (нужен slug) и попробуй снова.
         </div>
       )}
     </div>
